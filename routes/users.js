@@ -4,13 +4,13 @@ const { v4: uuidv4 } = require('uuid');
 // Mock database
 let users = [
   {
-    id:uuidv4(),
+    id: uuidv4(),
     first_name: 'John',
     last_name: 'Doe',
     email: 'johndoe@example.com',
   },
   {
-    id:uuidv4(),
+    id: uuidv4(),
     first_name: 'Alice',
     last_name: 'Smith',
     email: 'alicesmith@example.com',
@@ -30,7 +30,7 @@ router.get('/', (req, res) => {
 
 // Add a new user
 router.post('/', (req, res) => {
-  const { first_name,last_name, email } = req.body;
+  const { first_name, last_name, email } = req.body;
 
   // Validation
   if (!first_name) {
@@ -51,7 +51,7 @@ router.post('/', (req, res) => {
   if (!emailRegex.test(email)) {
     return res.status(400).send('Invalid email format.');
   }
-    // Check for duplicate email
+  // Check for duplicate email
   const emailExists = users.some(user => user.email === email);
   if (emailExists) {
     return res.status(400).send('Email already exists.');
@@ -87,16 +87,16 @@ router.delete('/:id', (req, res) => {
 router.patch('/:id', (req, res) => {
   const { id } = req.params;
 
-  const { first_name, last_name, email} = req.body;
+  const { first_name, last_name, email } = req.body;
 
   const user = users.find((user) => user.id === id)
 
-  if(first_name) user.first_name = first_name;
-  if(last_name) user.last_name = last_name;
-  if(email) user.email = email;
+  if (first_name) user.first_name = first_name;
+  if (last_name) user.last_name = last_name;
+  if (email) user.email = email;
 
   res.send(`User with the ${id} has been updated`)
-  
+
 });
 
 module.exports = router;
