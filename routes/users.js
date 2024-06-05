@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
+
 // Mock database
 let users = [
   {
@@ -26,8 +27,6 @@ router.get('/', (req, res) => {
   res.send(users);
 });
 
-
-
 // Add a new user
 router.post('/', (req, res) => {
   const { first_name, last_name, email } = req.body;
@@ -51,6 +50,7 @@ router.post('/', (req, res) => {
   if (!emailRegex.test(email)) {
     return res.status(400).send('Invalid email format.');
   }
+
   // Check for duplicate email
   const emailExists = users.some(user => user.email === email);
   if (emailExists) {
@@ -62,41 +62,60 @@ router.post('/', (req, res) => {
 
   res.send(`${user.first_name} has been added to the Database`);
 });
+
 // Getting a specific user data from database
 router.get('/:id', (req, res) => {
   const { id } = req.params;
 
-  const foundUser = users.find((user) => user.id === id)
+  const foundUser = users.find((user) => user.id === id);
 
-  res.send(foundUser)
-});
-//delete a user from the database
-router.delete('/:id', (req, res) => {
-  const { id } = req.params;
-  const userIndex = users.findIndex(user => user.id === id);
-
-  if (userIndex !== -1) {
-    const deletedUser = users.splice(userIndex, 1)[0]; // Removes the user from the array
-    res.status(200).send(deletedUser);
-  } else {
-    res.status(404).send({ message: 'User not found' });
+  if (!foundUser) {
+    return res.status(404).send({ message: 'User not found' });
   }
-});
-//updating the data
 
+  res.send(foundUser);
+});
+
+// Update a user
 router.patch('/:id', (req, res) => {
   const { id } = req.params;
-
   const { first_name, last_name, email } = req.body;
 
-  const user = users.find((user) => user.id === id)
+  const user = users.find((user) => user.id === id);
+
+  if (!user) {
+    return res.status(404).send({ message: 'User not found' });
+  }
 
   if (first_name) user.first_name = first_name;
   if (last_name) user.last_name = last_name;
   if (email) user.email = email;
 
-  res.send(`User with the ${id} has been updated`)
+  res.send(`User with the id ${id} has been updated`);
+});
 
+// Delete a user with confirmation
+router.delete('/:id', (req, res) => {
+  const { id } = req.params;
+  const confirmation = req.query.confirmation === 'true';
+  const userIndex = users.findIndex(user => user.id === id);
+
+  if (userIndex === -1) {
+    return res.status(404).send({ message: 'User not found' });
+  }
+
+  if (!confirmation) {
+    return res.status(200).send({
+      message: `Are you sure you want to delete user with id ${id}?`,
+      confirmation: false
+    });
+  }
+
+  const deletedUser = users.splice(userIndex, 1)[0]; // Removes the user from the array
+  return res.status(200).send({
+    message: `User with id ${id} deleted successfully`,
+    user: deletedUser
+  });
 });
 
 module.exports = router;
